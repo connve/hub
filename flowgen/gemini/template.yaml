@@ -1,0 +1,4 @@
+name: "Gemini"
+description: "Google Gemini on the AI gateway as the model `default`, routing each request to the Gemini model that fits it."
+category: "AI"
+tags: ["ai", "gemini", "google", "llm-proxy", "agents"]

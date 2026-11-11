@@ -1,0 +1,24 @@
+# Searches Salesforce accounts and contacts with SOSL, as an MCP tool for agents.
+flow:
+  labels:
+    display_name: "Salesforce Search"
+    description: "Finds Salesforce accounts and contacts by a search term, for agents."
+    tags: ["salesforce", "sosl", "mcp"]
+  tasks:
+    - mcp_tool:
+        name: salesforce_search
+        description: "Search Salesforce accounts and contacts by a search term."
+        input_schema:
+          type: object
+          properties:
+            search_term:
+              type: string
+              minLength: 2
+              description: "Words to find in any field, at least 2 characters."
+          required: [search_term]
+
+    # The trailing * also finds words that start with the term.
+    - salesforce_restapi_search:
+        name: search
+        credentials_path: credentials/salesforce.json
+        query: 'FIND {"{{event.data.search_term}}*"} IN ALL FIELDS RETURNING Account(Id, Name, Industry), Contact(Id, FirstName, LastName, Email)'

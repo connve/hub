@@ -1,0 +1,36 @@
+# Google Gemini as the model `default`, routing each request to a Gemini model.
+flow:
+  labels:
+    display_name: "Gemini"
+    description: "Serves Google Gemini as the model default, routing each request to the Gemini model that fits it."
+    tags: ["ai", "gemini", "llm-proxy"]
+  tasks:
+    # Clients ask for `default`, or `default/<model>` for one model.
+    - llm_proxy:
+        name: default
+
+    # Picks the model: the one asked for, Flash for tools or long prompts, Flash Lite otherwise.
+    - script:
+        name: route
+        code: |
+          let asked = event.data.model;
+          let heavy = type_of(event.data.tools) == "array" || event.data.prompt.len() > 20000;
+          event.data.routed_model = if type_of(asked) == "string" && asked != "" {
+            asked
+          } else if heavy {
+            "gemini-2.5-flash"
+          } else {
+            "gemini-2.5-flash-lite"
+          };
+          event
+
+    # Forwards the conversation and the caller's tools to Gemini, streaming the answer back.
+    - ai_completion:
+        name: gemini
+        provider: google
+        model: "{{event.data.routed_model}}"
+        credentials_path: credentials/gemini.json
+        prompt: "{{event.data.prompt}}"
+        system_prompt: "{{event.data.system_prompt}}"
+        tool_passthrough: true
+        stream: true
