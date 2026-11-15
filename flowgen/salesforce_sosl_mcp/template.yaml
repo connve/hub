@@ -1,4 +1,4 @@
 name: "Salesforce search for agents"
-description: "An MCP tool that searches Salesforce accounts and contacts with SOSL."
+description: "An MCP tool, guide and prompt that search Salesforce accounts, contacts, leads, opportunities, cases and activities with SOSL."
 category: "Salesforce"
 tags: ["salesforce", "sosl", "mcp", "agents"]

@@ -14,7 +14,7 @@ A client that wants one model asks for it by name, for example
 ## Needs
 
 - The AI gateway on.
-- `credentials/gemini.json`, with the Gemini API key as `api_key`, added in Connections.
+- The credentials `gemini`, with the Gemini API key as `api_key`, added in Connections; flowgen commits them encrypted as `credentials/gemini.yaml`.
 
 ## Change it
 

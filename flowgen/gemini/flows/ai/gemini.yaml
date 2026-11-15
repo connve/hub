@@ -29,7 +29,7 @@ flow:
         name: gemini
         provider: google
         model: "{{event.data.routed_model}}"
-        credentials_path: credentials/gemini.json
+        credentials_path: "{{env.FLOWGEN_CREDENTIALS}}/gemini.json"
         prompt: "{{event.data.prompt}}"
         system_prompt: "{{event.data.system_prompt}}"
         tool_passthrough: true

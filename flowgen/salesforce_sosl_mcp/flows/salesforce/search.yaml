@@ -1,13 +1,14 @@
-# Searches Salesforce accounts and contacts with SOSL, as an MCP tool for agents.
+# Searches Salesforce records with SOSL, as an MCP tool for agents, with a
+# guide and a prompt that use it.
 flow:
   labels:
     display_name: "Salesforce Search"
-    description: "Finds Salesforce accounts and contacts by a search term, for agents."
+    description: "Finds Salesforce accounts, contacts, leads, opportunities, cases and activities by a search term, for agents."
     tags: ["salesforce", "sosl", "mcp"]
   tasks:
     - mcp_tool:
         name: salesforce_search
-        description: "Search Salesforce accounts and contacts by a search term."
+        description: "Search Salesforce accounts, contacts, leads, opportunities, cases, tasks and events by a search term. Read the salesforce_search_guide resource for what it matches and returns."
         input_schema:
           type: object
           properties:
@@ -17,8 +18,28 @@ flow:
               description: "Words to find in any field, at least 2 characters."
           required: [search_term]
 
-    # The trailing * also finds words that start with the term.
+    # The objects and fields to search; the trailing * also finds words that start with the term.
     - salesforce_restapi_search:
         name: search
-        credentials_path: credentials/salesforce.json
-        query: 'FIND {"{{event.data.search_term}}*"} IN ALL FIELDS RETURNING Account(Id, Name, Industry), Contact(Id, FirstName, LastName, Email)'
+        credentials_path: "{{env.FLOWGEN_CREDENTIALS}}/salesforce.json"
+        query:
+          resource: salesforce/search.sosl
+
+    # What the tool matches and returns, and notes on this org, for agents.
+    - mcp_resource:
+        name: salesforce_search_guide
+        description: "How salesforce_search matches and what it returns, with notes on this org."
+        mime_type: text/markdown
+        content:
+          resource: salesforce/search.md
+
+    # Finds a customer with the tool and says which record is meant.
+    - mcp_prompt:
+        name: find_customer
+        description: "Find a customer in Salesforce by name, email or company, with their open deals, cases and recent activity."
+        arguments:
+          - name: customer
+            description: "A name, email or company."
+            required: true
+        template:
+          resource: salesforce/find_customer.md
