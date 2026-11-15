@@ -1,0 +1,8 @@
+FIND {"{{event.data.search_term}}*"} IN ALL FIELDS RETURNING
+Account(Id, Name, Type, Industry, Phone, Website LIMIT 20),
+Contact(Id, FirstName, LastName, Title, Email, Phone, AccountId LIMIT 20),
+Lead(Id, FirstName, LastName, Company, Email, Status LIMIT 20),
+Opportunity(Id, Name, StageName, Amount, CloseDate, AccountId LIMIT 20),
+Case(Id, CaseNumber, Subject, Status, Priority, AccountId, ContactId LIMIT 20),
+Task(Id, Subject, Status, ActivityDate, WhoId, WhatId LIMIT 20),
+Event(Id, Subject, StartDateTime, EndDateTime, WhoId, WhatId LIMIT 20)
