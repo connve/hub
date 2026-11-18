@@ -1,5 +1,5 @@
 # Searches Salesforce records with SOSL, as an MCP tool for agents, with a
-# guide and a prompt that use it.
+# prompt that uses it. The toolset's instructions are resources/salesforce/instructions.md.
 flow:
   labels:
     display_name: "Salesforce Search"
@@ -8,7 +8,7 @@ flow:
   tasks:
     - mcp_tool:
         name: salesforce_search
-        description: "Search Salesforce accounts, contacts, leads, opportunities, cases, tasks and events by a search term. Read the salesforce_search_guide resource for what it matches and returns."
+        description: "Search Salesforce accounts, contacts, leads, opportunities, cases, tasks and events by a search term, matching words that start with it."
         input_schema:
           type: object
           properties:
@@ -24,14 +24,6 @@ flow:
         credentials_path: "{{env.FLOWGEN_CREDENTIALS}}/salesforce.json"
         query:
           resource: salesforce/search.sosl
-
-    # What the tool matches and returns, and notes on this org, for agents.
-    - mcp_resource:
-        name: salesforce_search_guide
-        description: "How salesforce_search matches and what it returns, with notes on this org."
-        mime_type: text/markdown
-        content:
-          resource: salesforce/search.md
 
     # Finds a customer with the tool and says which record is meant.
     - mcp_prompt:

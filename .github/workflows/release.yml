@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "flowgen/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  flowgen-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oras-project/setup-oras@v2
+        with:
+          version: 1.4.0
+
+      # The newest CHANGELOG heading, such as `## 2026-11-18` or `## 2026-11-18.2`,
+      # is the release's version: 2026.11.18 or 2026.11.18.2.
+      - name: Read the version from CHANGELOG.md
+        id: version
+        run: |
+          heading=$(grep -m1 '^## ' CHANGELOG.md | sed 's/^## //')
+          if ! echo "$heading" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}(\.[0-9]+)?$'; then
+            echo "The newest CHANGELOG.md heading '$heading' is not a date such as 2026-11-18 or 2026-11-18.2" >&2
+            exit 1
+          fi
+          echo "version=$(echo "$heading" | tr '-' '.')" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | oras login ghcr.io --username "${{ github.actor }}" --password-stdin
+
+      # Each committed file is a layer titled with its path under flowgen/,
+      # such as gemini/template.yaml, which is how flowgen reads a catalog.
+      - name: Push the flowgen catalog
+        working-directory: flowgen
+        run: |
+          git ls-files -z | xargs -0 oras push \
+            "ghcr.io/${{ github.repository }}/flowgen:latest,${{ steps.version.outputs.version }},${GITHUB_SHA::12}" \
+            --annotation "org.opencontainers.image.source=https://github.com/${{ github.repository }}"

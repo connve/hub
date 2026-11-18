@@ -7,7 +7,7 @@
 - The term is matched against every searchable field: names, emails, phone numbers, addresses, subjects and text fields.
 - A term matches words that start with it, so `acme` finds `Acme Corp` and `acme.com`.
 - A term needs at least 2 characters.
-- Several words find records that contain all of them, in any field.
+- Several words match as a phrase, in that order.
 - Each object returns at most 20 records; search more specifically when a list looks cut off.
 
 ## What it returns
@@ -32,7 +32,3 @@
 - Search by email or email domain to find a person or the people at a company.
 - To see everything about a customer, search the company name, then use the `Id`s to connect contacts, opportunities, cases and activities to the account.
 - `Id` identifies a record in Salesforce; quote it when you refer to a record.
-
-## This org
-
-Describe your org here: what the records stand for, stages and statuses in use, naming conventions, custom fields worth knowing, and anything an agent should not do.
