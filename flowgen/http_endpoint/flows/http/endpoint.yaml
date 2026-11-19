@@ -1,0 +1,28 @@
+# Receives a JSON request, reshapes it with resources/http/to_request.rhai and
+# sends it to an API; the caller gets the API's response.
+flow:
+  labels:
+    display_name: "HTTP endpoint"
+    description: "Reshapes each request it receives and sends it to an API."
+    tags: ["http", "webhook"]
+  tasks:
+    # Requests need Authorization: Bearer <token>, the token in http_endpoint.
+    - http_endpoint:
+        name: receive
+        endpoint: /webhook
+        method: POST
+        credentials_path: "{{env.FLOWGEN_CREDENTIALS}}/http_endpoint.json"
+        ack_timeout: 30s
+
+    - script:
+        name: to_request
+        code:
+          resource: http/to_request.rhai
+
+    - http_request:
+        name: send
+        endpoint: "https://api.example.com/items"
+        method: POST
+        credentials_path: "{{env.FLOWGEN_CREDENTIALS}}/http_endpoint_api.json"
+        payload:
+          from_event: true

@@ -1,0 +1,54 @@
+name: Check
+
+on:
+  pull_request:
+    paths:
+      - "flowgen/**"
+      - ".github/workflows/check.yml"
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  flowgen-templates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The latest flowgen release, the version that reads the catalog's `latest` tag,
+      # run only once its attestation shows connve/flowgen's release workflow built it.
+      - name: Install flowgen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(gh release view --repo connve/flowgen --json tagName --jq .tagName)
+          archive="flowgen-linux-amd64-${tag#v}.tar.gz"
+          gh release download "$tag" --repo connve/flowgen --pattern "$archive" --dir "$RUNNER_TEMP"
+          gh attestation verify "$RUNNER_TEMP/$archive" --repo connve/flowgen
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" flowgen
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      - name: Validate each template
+        run: |
+          flowgen --version
+          for template in flowgen/*/; do
+            flowgen validate "$template"
+          done
+
+      # Each script resources/<path>.rhai runs on its samples in tests/<path>.ndjson.
+      - name: Test each template's scripts
+        run: |
+          failed=0
+          for script in $(find flowgen -path '*/resources/*.rhai' | sort); do
+            template=${script%%/resources/*}
+            path=${script#*/resources/}
+            samples="$template/tests/${path%.rhai}.ndjson"
+            if [ ! -f "$samples" ]; then
+              echo "$script has no samples at $samples" >&2
+              failed=1
+              continue
+            fi
+            flowgen test "$script" --data "$samples" || failed=1
+          done
+          exit $failed

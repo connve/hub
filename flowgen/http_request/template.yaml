@@ -1,0 +1,4 @@
+name: "HTTP request"
+description: "Reads an API every few minutes and passes on the records it returns."
+category: "HTTP"
+tags: ["http", "api", "schedule"]
