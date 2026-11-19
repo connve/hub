@@ -1,0 +1,4 @@
+name: "HTTP endpoint"
+description: "An HTTP endpoint that reshapes each request and sends it to an API, answering with the API's response."
+category: "HTTP"
+tags: ["http", "webhook", "api"]
