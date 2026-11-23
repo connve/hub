@@ -1,0 +1,26 @@
+# Reads an API on a schedule and keeps the records resources/http/to_records.rhai
+# picks from the response.
+flow:
+  labels:
+    display_name: "HTTP request"
+    description: "Reads an API every five minutes and passes on its records."
+    tags: ["http", "schedule"]
+  require_leader_election: true
+  tasks:
+    - generate:
+        name: tick
+        interval: 5m
+
+    - http_request:
+        name: fetch
+        endpoint: "https://api.example.com/items"
+        method: GET
+        credentials_path: "{{env.FLOWGEN_CREDENTIALS}}/http_request_api.json"
+
+    - script:
+        name: to_records
+        code:
+          resource: http/to_records.rhai
+
+    - log:
+        name: records
